@@ -5,13 +5,6 @@ import (
 	"log"
 )
 
-type Company struct {
-	Id          uint
-	Name        string
-	Description string
-	Website     string
-}
-
 type Job struct {
 	Id          uint
 	Title       string
@@ -26,7 +19,7 @@ type Job struct {
 var DB *sql.DB
 
 func AddJob(job Job) error {
-	_, err := DB.Exec("INSERT INTO jobs (description, title, link) VALUES ($1, $2, $3)", job.Description, job.Title, job.Link)
+	_, err := DB.Exec("INSERT INTO jobs (description, title, link, company_id) VALUES ($1, $2, $3)", job.Description, job.Title, job.Link, job.Company.Id)
 	return err
 }
 
@@ -39,7 +32,8 @@ func GetJobs() ([]Job, error) {
 	var jobs []Job
 	for res.Next() {
 		var job Job
-		if err := res.Scan(&job.Id, &job.Description, &job.Title, &job.Link); err != nil {
+		var companyId uint
+		if err := res.Scan(&job.Id, &job.Description, &job.Title, &job.Link, companyId); err != nil {
 			log.Printf("Failed to retrieve row from DB: %v", err)
 			continue
 		}

@@ -15,8 +15,6 @@ var baseDomain = "careers.datadoghq.com"
 var baseUrl = "https://" + baseDomain
 
 func ScrapeDatadog() ([]models.Job, error) {
-	// uncomment to display chrome ctx, _ := chromedp.NewExecAllocator(context.Background(), append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("headless", false))...)
-	// ctx, cancel := chromedp.NewContext(ctx)
 	ctx, cancel := chromedp.NewContext(context.Background())
 
 	defer cancel()
