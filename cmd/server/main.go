@@ -11,21 +11,16 @@ import (
 )
 
 func main() {
+	var err error
 	connStr := "postgresql://postgres:password@localhost:5432/jobs?sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	models.DB, err = sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatalf("Could not open DB: %v: ", err)
+		log.Fatalln(err)
 	}
-	res, err := db.Query("SELECT * FROM jobs")
+
+	jobs, err := models.GetJobs()
 	if err != nil {
 		log.Fatalf("Failed to retrieve jobs from DB: %v", err)
-	}
-	var jobs []models.Job
-
-	for res.Next() {
-		var job models.Job
-		res.Scan(&job.Id, &job.Description, &job.Title, &job.Link)
-		jobs = append(jobs, job)
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +29,6 @@ func main() {
 		}
 
 	})
-
+	log.Println("Starting to listen on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
