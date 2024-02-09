@@ -2,6 +2,7 @@ package collectors
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -11,10 +12,17 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+var companyShortname = "datadog"
 var baseDomain = "careers.datadoghq.com"
 var baseUrl = "https://" + baseDomain
+var company *models.Company
 
 func ScrapeDatadog() ([]models.Job, error) {
+	company = models.GetCompanyByShortname(companyShortname)
+	if company == nil {
+		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
+	}
+	log.Printf("company: %v", company)
 	ctx, cancel := chromedp.NewContext(context.Background())
 
 	defer cancel()
@@ -93,7 +101,8 @@ func extractJobInfo(urls []string) ([]models.Job, error) {
 		jobs[len(jobs)-1].Description = h.Text
 	})
 	for _, url := range urls {
-		jobs = append(jobs, *new(models.Job))
+		job := models.Job{Company: company}
+		jobs = append(jobs, job)
 		c.Visit(url)
 	}
 	return jobs, nil

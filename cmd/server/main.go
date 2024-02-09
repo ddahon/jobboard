@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
@@ -13,12 +12,12 @@ import (
 func main() {
 	var err error
 	connStr := "postgresql://postgres:password@localhost:5432/jobs?sslmode=disable"
-	models.DB, err = sql.Open("postgres", connStr)
+	err = models.InitDB(connStr)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	jobs, err := models.GetJobs()
+	jobs, err := models.GetAllJobs()
 	if err != nil {
 		log.Fatalf("Failed to retrieve jobs from DB: %v", err)
 	}

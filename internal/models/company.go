@@ -1,24 +1,50 @@
 package models
 
-import "errors"
+import "log"
 
 type Company struct {
 	Id          uint
-	Name        string
-	Description string
-	Website     string
+	Name        *string
+	Description *string
+	Website     *string
+	Shortname   *string
 }
 
-func GetCompany(name string) (Company, error) {
-	var company Company
-	res, err := DB.Query("SELECT * FROM companies WHERE shortname='$1'", name)
+func GetCompanyByShortname(shortname string) *Company {
+	for _, c := range allCompanies {
+		if c.Shortname == nil {
+			continue
+		}
+		if *c.Shortname == shortname {
+			return &c
+		}
+	}
+	return nil
+}
+
+func GetCompanyById(id uint) *Company {
+	for _, c := range allCompanies {
+		if c.Id == id {
+			return &c
+		}
+	}
+	return nil
+}
+
+func (c Company) GetAllJobs() ([]Job, error) {
+	var jobs []Job
+	res, err := db.Query("SELECT * FROM jobs WHERE company_id=$1", c.Id)
 	if err != nil {
-		return company, err
+		return nil, err
 	}
 
-	if !res.Next() {
-		return company, errors.New("Company not found: " + name)
+	for res.Next() {
+		var job Job
+		if err := job.Scan(res); err != nil {
+			log.Printf("Failed to retrieve job: %v", err)
+		}
+		jobs = append(jobs, job)
 	}
-	res.Scan(&company.Id, &company.Name, &company.Description, &company.Website)
-	return company, nil
+
+	return jobs, nil
 }

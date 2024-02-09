@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 
 	"github.com/ddahon/jobboard/cmd/scraper/collectors"
@@ -14,10 +13,8 @@ var allCollectors = map[string]func() ([]models.Job, error){
 }
 
 func main() {
-	var err error
 	connStr := "postgresql://postgres:password@localhost:5432/jobs?sslmode=disable"
-	models.DB, err = sql.Open("postgres", connStr)
-	if err != nil {
+	if err := models.InitDB(connStr); err != nil {
 		log.Fatalln(err)
 	}
 

@@ -10,35 +10,35 @@ type Job struct {
 	Title       string
 	Description string
 	Link        string
-	Company     Company
+	Company     *Company
 	Languages   []string
 	SalaryBegin uint
 	SalaryEnd   uint
 }
 
-var DB *sql.DB
-
 func AddJob(job Job) error {
-	_, err := DB.Exec("INSERT INTO jobs (description, title, link, company_id) VALUES ($1, $2, $3)", job.Description, job.Title, job.Link, job.Company.Id)
+	_, err := db.Exec("INSERT INTO jobs (description, title, link, company_id) VALUES ($1, $2, $3, $4)", job.Description, job.Title, job.Link, job.Company.Id)
 	return err
 }
 
-func GetJobs() ([]Job, error) {
-	res, err := DB.Query("SELECT * FROM jobs")
-	if err != nil {
-		return nil, err
-	}
-
-	var jobs []Job
-	for res.Next() {
-		var job Job
-		var companyId uint
-		if err := res.Scan(&job.Id, &job.Description, &job.Title, &job.Link, companyId); err != nil {
-			log.Printf("Failed to retrieve row from DB: %v", err)
-			continue
+func GetAllJobs() ([]Job, error) {
+	var allJobs []Job
+	for _, c := range allCompanies {
+		jobs, err := c.GetAllJobs()
+		if err != nil {
+			log.Printf("Failed to retrieve jobs for company %v: %v", c.Shortname, err)
 		}
-		jobs = append(jobs, job)
+		allJobs = append(allJobs, jobs...)
 	}
 
-	return jobs, nil
+	return allJobs, nil
+}
+
+func (j *Job) Scan(rows *sql.Rows) error {
+	var companyId uint
+	if err := rows.Scan(&j.Id, &j.Description, &j.Title, &j.Link, &companyId); err != nil {
+		return err
+	}
+	j.Company = GetCompanyById(companyId)
+	return nil
 }
