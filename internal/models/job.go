@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"log"
 )
 
 type Job struct {
@@ -22,23 +21,38 @@ func AddJob(job Job) error {
 }
 
 func GetAllJobs() ([]Job, error) {
-	var allJobs []Job
-	for _, c := range allCompanies {
-		jobs, err := c.GetAllJobs()
-		if err != nil {
-			log.Printf("Failed to retrieve jobs for company %v: %v", c.Shortname, err)
-		}
-		allJobs = append(allJobs, jobs...)
+	var jobs []Job
+	res, err := db.Query("SELECT * FROM jobs")
+	if err != nil {
+		return nil, err
 	}
-
-	return allJobs, nil
+	for res.Next() {
+		job, err := NewJob(res)
+		if err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, job)
+	}
+	return jobs, nil
 }
 
-func (j *Job) Scan(rows *sql.Rows) error {
+func NewJob(rows *sql.Rows) (Job, error) {
+	var j Job
 	var companyId uint
-	if err := rows.Scan(&j.Id, &j.Description, &j.Title, &j.Link, &companyId); err != nil {
-		return err
+	var description, title, link sql.NullString
+	if err := rows.Scan(&j.Id, &description, &title, &link, &companyId); err != nil {
+		return j, err
+	}
+	if description.Valid {
+		j.Description = description.String
+	}
+	if title.Valid {
+		j.Title = title.String
+	}
+	if link.Valid {
+		j.Link = link.String
 	}
 	j.Company = GetCompanyById(companyId)
-	return nil
+
+	return j, nil
 }

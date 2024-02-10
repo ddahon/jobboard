@@ -39,8 +39,8 @@ func (c Company) GetAllJobs() ([]Job, error) {
 	}
 
 	for res.Next() {
-		var job Job
-		if err := job.Scan(res); err != nil {
+		job, err := NewJob(res)
+		if err != nil {
 			log.Printf("Failed to retrieve job: %v", err)
 		}
 		jobs = append(jobs, job)
