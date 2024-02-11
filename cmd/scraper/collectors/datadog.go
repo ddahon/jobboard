@@ -93,6 +93,9 @@ func extractJobInfo(urls []string) ([]models.Job, error) {
 	c.OnHTML("main > h2", func(h *colly.HTMLElement) {
 		jobs[len(jobs)-1].Title = h.Text
 	})
+	c.OnHTML("main > h2 + div", func(h *colly.HTMLElement) {
+		jobs[len(jobs)-1].Location = h.Text
+	})
 	c.OnHTML(".job-description", func(h *colly.HTMLElement) {
 		jobs[len(jobs)-1].Description = h.Text
 	})
