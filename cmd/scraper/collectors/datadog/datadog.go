@@ -1,4 +1,4 @@
-package collectors
+package datadog
 
 import (
 	"context"
@@ -17,7 +17,7 @@ var baseDomain = "careers.datadoghq.com"
 var baseUrl = "https://" + baseDomain
 var company *models.Company
 
-func ScrapeDatadog() ([]models.Job, error) {
+func Scrape() ([]models.Job, error) {
 	company = models.GetCompanyByShortname(companyShortname)
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
