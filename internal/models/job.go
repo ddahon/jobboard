@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"log"
 )
 
 type Job struct {
@@ -15,8 +16,12 @@ type Job struct {
 	SalaryEnd   uint
 }
 
-func AddJob(job Job) error {
-	_, err := db.Exec("INSERT INTO jobs (description, title, link, company_id) VALUES ($1, $2, $3, $4)", job.Description, job.Title, job.Link, job.Company.Id)
+func (j Job) Save() error {
+	if CheckJobExists(j.Link) {
+		log.Printf("Job with link %v already exists. Skipping...", j.Link)
+		return nil
+	}
+	_, err := db.Exec("INSERT INTO jobs (description, title, link, company_id) VALUES ($1, $2, $3, $4)", j.Description, j.Title, j.Link, j.Company.Id)
 	return err
 }
 
@@ -34,6 +39,16 @@ func GetAllJobs() ([]Job, error) {
 		jobs = append(jobs, job)
 	}
 	return jobs, nil
+}
+
+func CheckJobExists(link string) bool {
+	var count uint
+	res := db.QueryRow("SELECT count(*) FROM jobs WHERE link=$1", link)
+	if err := res.Scan(&count); err != nil {
+		log.Printf("Error while checking if job exists: %v", err)
+		return true
+	}
+	return count > 0
 }
 
 func NewJob(rows *sql.Rows) (Job, error) {

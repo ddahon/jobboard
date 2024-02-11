@@ -36,7 +36,6 @@ func ScrapeDatadog() ([]models.Job, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("jobs: %v", jobs)
 
 	return jobs, nil
 }

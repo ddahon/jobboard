@@ -26,7 +26,7 @@ func main() {
 			continue
 		}
 		for _, job := range jobs {
-			if err := models.AddJob(job); err != nil {
+			if err := job.Save(); err != nil {
 				log.Printf("Failed to register job in DB: %v", err)
 			}
 		}
