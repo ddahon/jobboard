@@ -18,7 +18,6 @@ func Scrape() ([]models.Job, error) {
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
-	log.Printf("company: %v", company)
 	jobLinks, err := getJobLinks()
 	if err != nil {
 		return nil, err

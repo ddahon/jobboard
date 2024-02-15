@@ -22,7 +22,6 @@ func Scrape() ([]models.Job, error) {
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
-	log.Printf("company: %v", company)
 	ctx, cancel := chromedp.NewContext(context.Background())
 
 	defer cancel()

@@ -36,7 +36,6 @@ func initCompanies() error {
 			continue
 		}
 		allCompanies = append(allCompanies, company)
-		log.Printf("Got all companies: %v", allCompanies)
 	}
 	return nil
 }

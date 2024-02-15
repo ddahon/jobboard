@@ -42,6 +42,8 @@ func main() {
 			}
 		}
 	}
+
+	models.DeleteDeadJobs()
 }
 
 func updateCollectorsList(args []string) {

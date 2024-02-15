@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -32,6 +33,35 @@ func (j Job) Save() error {
 	return err
 }
 
+func (j Job) Delete() error {
+	_, err := db.Exec("DELETE FROM jobs WHERE id=$1", j.Id)
+	if err != nil {
+		return err
+	}
+	log.Printf("Deleted job with link %v", j.Link)
+	return nil
+}
+
+func isDeadLink(link string) bool {
+	res, err := http.Get(link)
+	return res.StatusCode != 200 || err != nil
+}
+
+func DeleteDeadJobs() {
+	jobs, err := GetAllJobs()
+	if err != nil {
+		log.Printf("Could not retrieve jobs: %v. Skipping dead links checking", err)
+	}
+	for _, j := range jobs {
+		if !isDeadLink(j.Link) {
+			continue
+		}
+		if err := j.Delete(); err != nil {
+			log.Printf("Could not delete job: %v", err)
+		}
+	}
+}
+
 func GetAllJobs() ([]Job, error) {
 	var jobs []Job
 	res, err := db.Query("SELECT * FROM jobs")
@@ -41,7 +71,8 @@ func GetAllJobs() ([]Job, error) {
 	for res.Next() {
 		job, err := NewJob(res)
 		if err != nil {
-			return nil, err
+			log.Printf("Failed to retrieve a job: %v", err)
+			continue
 		}
 		jobs = append(jobs, job)
 	}
@@ -67,7 +98,7 @@ func NewJob(rows *sql.Rows) (Job, error) {
 	var j Job
 	var companyId uint
 	var description, title, link sql.NullString
-	if err := rows.Scan(&j.Id, &description, &title, &link, &companyId, &j.CreatedAt, &j.UpdatedAt); err != nil {
+	if err := rows.Scan(&j.Id, &description, &title, &link, &companyId, &j.CreatedAt, &j.UpdatedAt, &j.Location); err != nil {
 		return j, err
 	}
 	if description.Valid {
