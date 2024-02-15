@@ -99,13 +99,12 @@ func extractJobInfo(urls []string) ([]models.Job, error) {
 	c.OnHTML(".job-description", func(h *colly.HTMLElement) {
 		jobs[len(jobs)-1].Description = h.Text
 	})
-	c.OnHTML(".job-description", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Description = h.Text
-	})
 	for _, url := range urls {
 		job := models.Job{Company: company}
 		jobs = append(jobs, job)
-		c.Visit(url)
+		if err := c.Visit(url); err != nil {
+			log.Printf("Error while extracting job info in %v: %v", url, err)
+		}
 	}
 	return jobs, nil
 }

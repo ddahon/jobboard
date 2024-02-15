@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -24,10 +25,10 @@ func (j Job) Save() error {
 	exists, id := CheckJobExists(j.Link)
 	if exists {
 		log.Printf("Job with link %v already exists. Updating existing definition", j.Link)
-		_, err := db.Exec("UPDATE jobs SET description=$1, title=$2, location=$3, updated_at=$4 WHERE id=$5", j.Description, j.Title, j.Location, time.Now(), id)
+		_, err := db.Exec("UPDATE jobs SET description=$1, title=$2, location=$3, updated_at=$4 WHERE id=$5", strings.TrimSpace(j.Description), strings.TrimSpace(j.Title), strings.TrimSpace(j.Location), time.Now(), id)
 		return err
 	}
-	_, err := db.Exec("INSERT INTO jobs (description, title, link, company_id, location) VALUES ($1, $2, $3, $4, $5)", j.Description, j.Title, j.Link, j.Company.Id, j.Location)
+	_, err := db.Exec("INSERT INTO jobs (description, title, link, company_id, location) VALUES ($1, $2, $3, $4, $5)", strings.TrimSpace(j.Description), strings.TrimSpace(j.Title), strings.TrimSpace(j.Link), j.Company.Id, strings.TrimSpace(j.Location))
 	return err
 }
 

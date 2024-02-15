@@ -10,6 +10,12 @@ require (
 )
 
 require (
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/rs/zerolog v1.28.0 // indirect
+)
+
+require (
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/a-h/templ v0.2.543 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
@@ -27,6 +33,8 @@ require (
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
+	github.com/simukti/sqldb-logger v0.0.0-20230108155151-646c1a075551 // indirect
+	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20230108155151-646c1a075551
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
