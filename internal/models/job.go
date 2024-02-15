@@ -10,16 +10,14 @@ import (
 
 type Job struct {
 	Id          uint
-	Title       string
 	Description string
+	Title       string
 	Link        string
 	Company     *Company
-	Location    string // TODO make a dedicated Location struct
-	Languages   []string
-	SalaryBegin uint
-	SalaryEnd   uint
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	Location    string // TODO make a dedicated Location struct
+	Category    string // TODO make an enum ?
 }
 
 func (j Job) Save() error {
@@ -97,8 +95,8 @@ func CheckJobExists(link string) (bool, uint) {
 func NewJob(rows *sql.Rows) (Job, error) {
 	var j Job
 	var companyId uint
-	var description, title, link sql.NullString
-	if err := rows.Scan(&j.Id, &description, &title, &link, &companyId, &j.CreatedAt, &j.UpdatedAt, &j.Location); err != nil {
+	var description, title, link, location, category sql.NullString
+	if err := rows.Scan(&j.Id, &description, &title, &link, &companyId, &j.CreatedAt, &j.UpdatedAt, &location, &category); err != nil {
 		return j, err
 	}
 	if description.Valid {
@@ -109,6 +107,12 @@ func NewJob(rows *sql.Rows) (Job, error) {
 	}
 	if link.Valid {
 		j.Link = link.String
+	}
+	if location.Valid {
+		j.Location = location.String
+	}
+	if category.Valid {
+		j.Category = category.String
 	}
 	j.Company = GetCompanyById(companyId)
 
