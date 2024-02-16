@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ddahon/jobboard/cmd/scraper/collectors/canonical"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/datadog"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/spacelift"
 	"github.com/ddahon/jobboard/internal/models"
@@ -13,6 +14,7 @@ import (
 var allCollectors = map[string]func() ([]models.Job, error){
 	"datadog":   datadog.Scrape,
 	"spacelift": spacelift.Scrape,
+	"canonical": canonical.Scrape,
 }
 
 func main() {

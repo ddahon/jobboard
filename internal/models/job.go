@@ -46,6 +46,7 @@ func isDeadLink(link string) bool {
 }
 
 func DeleteDeadJobs() {
+	log.Println("Cleaning up outdated jobs")
 	jobs, err := GetAllJobs()
 	if err != nil {
 		log.Printf("Could not retrieve jobs: %v. Skipping dead links checking", err)
