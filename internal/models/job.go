@@ -42,7 +42,7 @@ func (j Job) Delete() error {
 
 func isDeadLink(link string) bool {
 	res, err := http.Get(link)
-	return res.StatusCode != 200 || err != nil
+	return err != nil || res.StatusCode != 200
 }
 
 func DeleteDeadJobs() {
@@ -67,6 +67,7 @@ func GetAllJobs() ([]Job, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Close()
 	for res.Next() {
 		job, err := NewJob(res)
 		if err != nil {
@@ -86,6 +87,7 @@ func CheckJobExists(link string) (bool, uint) {
 		log.Printf("Error while checking if job exists: %v", err)
 		return true, id
 	}
+	defer res.Close()
 	if !res.Next() { // no results found
 		return false, id
 	}

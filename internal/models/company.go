@@ -37,6 +37,7 @@ func (c Company) GetAllJobs() ([]Job, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Close()
 
 	for res.Next() {
 		job, err := NewJob(res)

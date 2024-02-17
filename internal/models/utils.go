@@ -27,6 +27,7 @@ func initCompanies() error {
 	if err != nil {
 		return err
 	}
+	defer res.Close()
 
 	for res.Next() {
 		var company Company

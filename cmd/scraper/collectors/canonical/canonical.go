@@ -22,7 +22,6 @@ func Scrape() ([]models.Job, error) {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
 	ctx, cancel := chromedp.NewContext(context.Background())
-
 	defer cancel()
 
 	jobLinks, err := getJobLinks(ctx)
@@ -41,12 +40,16 @@ func Scrape() ([]models.Job, error) {
 func getJobLinks(ctx context.Context) ([]string, error) {
 	var nodes []*cdp.Node
 	jobLinks := make([]string, 0)
-	err := chromedp.Run(ctx, chromedp.Navigate(baseUrl+"/careers/all?filter=Engineering"))
-	if err != nil {
+	if err := chromedp.Run(ctx, chromedp.Navigate(baseUrl+"/careers/all?filter=Engineering&location=emea")); err != nil {
 		return nil, err
 	}
-	log.Printf("hihi")
-	if err := chromedp.Run(ctx, chromedp.Nodes("h3 a[href]", &nodes, chromedp.ByQueryAll)); err != nil {
+	if err := chromedp.Run(ctx, chromedp.Click("#cookie-policy-button-accept", chromedp.AtLeast(0))); err != nil {
+		return nil, err
+	}
+	if err := chromedp.Run(ctx, chromedp.Evaluate(`document.querySelector("#show-all").click()`, nil)); err != nil {
+		return nil, err
+	}
+	if err := chromedp.Run(ctx, chromedp.Nodes("div[data-office]:not(div.u-hide) h3 a[href]", &nodes, chromedp.ByQueryAll)); err != nil {
 		log.Println(err)
 	} else {
 		for _, node := range nodes {
@@ -72,7 +75,7 @@ func extractJobInfo(urls []string) ([]models.Job, error) {
 	c.OnError(func(r *colly.Response, err error) {
 		log.Printf("Failed to visit %v: %v", r.Request.URL, err)
 	})
-	c.OnHTML("h1", func(h *colly.HTMLElement) {
+	c.OnHTML("#details h1", func(h *colly.HTMLElement) {
 		jobs[len(jobs)-1].Title = h.Text
 	})
 	c.OnHTML("p.p-muted-heading", func(h *colly.HTMLElement) {
