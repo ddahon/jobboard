@@ -1,12 +1,11 @@
 package canonical
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"log"
 
-	"github.com/chromedp/cdproto/cdp"
-	"github.com/chromedp/chromedp"
+	"github.com/ddahon/jobboard/cmd/scraper/collectors"
 	"github.com/ddahon/jobboard/internal/models"
 	"github.com/gocolly/colly/v2"
 )
@@ -14,82 +13,53 @@ import (
 var companyShortname = "canonical"
 var baseDomain = "canonical.com"
 var baseUrl = "https://" + baseDomain
+var startingUrl = baseUrl + "/careers/all"
 var company *models.Company
 
 func Scrape() ([]models.Job, error) {
+	var jobs []models.Job
 	company = models.GetCompanyByShortname(companyShortname)
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
 
-	jobLinks, err := getJobLinks(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	jobs, err := extractJobInfo(jobLinks)
-	if err != nil {
-		return nil, err
-	}
-
-	return jobs, nil
-}
-
-func getJobLinks(ctx context.Context) ([]string, error) {
-	var nodes []*cdp.Node
-	jobLinks := make([]string, 0)
-	if err := chromedp.Run(ctx, chromedp.Navigate(baseUrl+"/careers/all?filter=Engineering&location=emea")); err != nil {
-		return nil, err
-	}
-	if err := chromedp.Run(ctx, chromedp.Click("#cookie-policy-button-accept", chromedp.AtLeast(0))); err != nil {
-		return nil, err
-	}
-	if err := chromedp.Run(ctx, chromedp.Evaluate(`document.querySelector("#show-all").click()`, nil)); err != nil {
-		return nil, err
-	}
-	if err := chromedp.Run(ctx, chromedp.Nodes("div[data-office]:not(div.u-hide) h3 a[href]", &nodes, chromedp.ByQueryAll)); err != nil {
-		log.Println(err)
-	} else {
-		for _, node := range nodes {
-			if href, found := node.Attribute("href"); found {
-				jobLinks = append(jobLinks, baseUrl+href)
-			}
-		}
-	}
-
-	return jobLinks, nil
-}
-
-func extractJobInfo(urls []string) ([]models.Job, error) {
-	jobs := make([]models.Job, 0)
 	c := colly.NewCollector(colly.AllowedDomains(baseDomain))
-
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
-	})
-	c.OnScraped(func(r *colly.Response) {
-		jobs[len(jobs)-1].Link = r.Request.URL.String()
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Failed to visit %v: %v", r.Request.URL, err)
-	})
-	c.OnHTML("#details h1", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Title = h.Text
-	})
-	c.OnHTML("p.p-muted-heading", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Location = h.Text
-	})
-	c.OnHTML("#details > div:nth-child(2)", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Description = h.Text
-	})
-	for _, url := range urls {
-		job := models.Job{Company: company}
-		jobs = append(jobs, job)
-		if err := c.Visit(url); err != nil {
-			log.Printf("Error while extracting job info in %v: %v", url, err)
+	c.OnHTML(`script[type="text/javascript"]`, func(h *colly.HTMLElement) {
+		jsSrc := h.Text
+		v, err := collectors.GetJsArrayVar(jsSrc, "vacancies")
+		if err != nil {
+			log.Printf("Error while parsing js script: %v", err)
+			return
 		}
+		var res []canonicalJob
+		if err := json.Unmarshal([]byte(v), &res); err != nil {
+			log.Printf("Error while parsing js: %v", err)
+		}
+		for _, j := range res {
+			jobs = append(jobs, j.toJob())
+		}
+	})
+	err := c.Visit(startingUrl)
+	if err != nil {
+		return jobs, err
 	}
+
 	return jobs, nil
+}
+
+type canonicalJob struct {
+	Title       string
+	Description string
+	Location    string
+	Link        string `json:"url"`
+}
+
+func (cj *canonicalJob) toJob() models.Job {
+	return models.Job{
+		Title:       cj.Title,
+		Description: cj.Description,
+		Link:        cj.Link,
+		Location:    cj.Location,
+		Company:     company,
+	}
 }

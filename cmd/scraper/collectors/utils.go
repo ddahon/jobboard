@@ -1,6 +1,7 @@
 package collectors
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -8,7 +9,7 @@ import (
 	"regexp"
 )
 
-func GetStringFromJs(src string, key string) string {
+func GetJsKV(src string, key string) string {
 	var val string
 	r, err := regexp.Compile(fmt.Sprintf(`%v:"([^"]+)"`, key))
 	if err != nil {
@@ -19,6 +20,39 @@ func GetStringFromJs(src string, key string) string {
 	}
 
 	return val
+}
+
+func findJsArray(src string) (string, error) { //TODO write test
+	n := 0
+	for i, c := range src {
+		if c == '[' {
+			n++
+		}
+		if c == ']' {
+			if n < 1 {
+				break
+			}
+			n--
+		}
+		if n == 0 {
+			return src[:i+1], nil
+		}
+	}
+
+	return "", errors.New("cannot find array: invalid js")
+}
+
+func GetJsArrayVar(src string, name string) (string, error) {
+	var val string
+	r, err := regexp.Compile(fmt.Sprintf(`%v\s*=\s*`, name))
+	if err != nil {
+		return val, err
+	}
+	if m := r.FindStringIndex(src); m != nil {
+		return findJsArray(src[m[1]:])
+	}
+
+	return val, fmt.Errorf("array variable %v not found", name)
 }
 
 func FetchFileContent(url string) (string, error) {

@@ -39,9 +39,9 @@ func getAlgoliaParams() (string, string, string, error) {
 	if err != nil {
 		return apiKey, appId, index, err
 	}
-	apiKey = collectors.GetStringFromJs(jsSrc, "ALGOLIA_PUBLIC_TOKEN")
-	appId = collectors.GetStringFromJs(jsSrc, "ALGOLIA_APPLICATION")
-	index = collectors.GetStringFromJs(jsSrc, "ALGOLIA_INDEX")
+	apiKey = collectors.GetJsKV(jsSrc, "ALGOLIA_PUBLIC_TOKEN")
+	appId = collectors.GetJsKV(jsSrc, "ALGOLIA_APPLICATION")
+	index = collectors.GetJsKV(jsSrc, "ALGOLIA_INDEX")
 
 	return apiKey, appId, index, nil
 }
