@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 
+	"github.com/ddahon/jobboard/cmd/scraper/analytics"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/canonical"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/datadog"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/spacelift"
@@ -27,11 +29,15 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	scrapeStats := map[string]analytics.ScrapeResult{}
+
 	for name, scrape := range allCollectors {
+		nbFound := 0
 		log.Println("starting scraping of company:", name)
 		jobs, err := scrape()
 		if err != nil {
 			log.Printf("failed to scrape %v: %v\n", name, err)
+			scrapeStats[name] = analytics.ScrapeResult{Failed: true}
 			continue
 		}
 		if jobs == nil {
@@ -42,10 +48,17 @@ func main() {
 			if err := job.Save(); err != nil {
 				log.Printf("Failed to register job in DB: %v", err)
 			}
+			nbFound++
 		}
+		scrapeStats[name] = analytics.ScrapeResult{NbFound: nbFound}
 	}
 
-	models.DeleteDeadJobs()
+	models.DeleteDeadJobs(scrapeStats)
+
+	b, err := json.MarshalIndent(scrapeStats, "", "  ")
+	if err == nil {
+		log.Println(string(b))
+	}
 }
 
 func updateCollectorsList(args []string) {

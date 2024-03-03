@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/ddahon/jobboard/cmd/scraper/analytics"
 )
 
 type Job struct {
@@ -45,7 +47,7 @@ func isDeadLink(link string) bool {
 	return err != nil || res.StatusCode != 200
 }
 
-func DeleteDeadJobs() {
+func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 	log.Println("Cleaning up outdated jobs")
 	jobs, err := GetAllJobs()
 	if err != nil {
@@ -57,6 +59,10 @@ func DeleteDeadJobs() {
 		}
 		if err := j.Delete(); err != nil {
 			log.Printf("Could not delete job: %v", err)
+		}
+		if e, ok := scrapeStats[*j.Company.Shortname]; ok {
+			e.NbDeleted++
+			scrapeStats[*j.Company.Shortname] = e
 		}
 	}
 }
