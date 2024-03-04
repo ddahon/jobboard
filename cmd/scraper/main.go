@@ -8,6 +8,7 @@ import (
 	"github.com/ddahon/jobboard/cmd/scraper/analytics"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/canonical"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/datadog"
+	"github.com/ddahon/jobboard/cmd/scraper/collectors/lumenalta"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/spacelift"
 	"github.com/ddahon/jobboard/internal/models"
 	_ "github.com/lib/pq"
@@ -17,6 +18,7 @@ var allCollectors = map[string]func() ([]models.Job, error){
 	"datadog":   datadog.Scrape,
 	"spacelift": spacelift.Scrape,
 	"canonical": canonical.Scrape,
+	"lumenalta": lumenalta.Scrape,
 }
 
 func main() {
