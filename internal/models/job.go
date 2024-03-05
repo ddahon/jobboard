@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ddahon/jobboard/cmd/scraper/analytics"
@@ -53,17 +54,31 @@ func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 	if err != nil {
 		log.Printf("Could not retrieve jobs: %v. Skipping dead links checking", err)
 	}
+	c := make(chan Job, len(jobs))
+	var wg sync.WaitGroup
 	for _, j := range jobs {
-		if !isDeadLink(j.Link) {
-			continue
-		}
-		if err := j.Delete(); err != nil {
-			log.Printf("Could not delete job: %v", err)
-		}
+		wg.Add(1)
+		go func(j Job) {
+			defer wg.Done()
+			if !isDeadLink(j.Link) {
+				return
+			}
+			if err := j.Delete(); err != nil {
+				log.Printf("Could not delete job: %v", err)
+				return
+			}
+			c <- j
+		}(j)
+	}
+	wg.Wait()
+	select {
+	case j := <-c:
 		if e, ok := scrapeStats[*j.Company.Shortname]; ok {
 			e.NbDeleted++
 			scrapeStats[*j.Company.Shortname] = e
 		}
+	default:
+		return
 	}
 }
 
