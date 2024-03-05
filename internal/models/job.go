@@ -63,16 +63,16 @@ func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 			if !isDeadLink(j.Link) {
 				return
 			}
-			if err := j.Delete(); err != nil {
-				log.Printf("Could not delete job: %v", err)
-				return
-			}
 			c <- j
 		}(j)
 	}
 	wg.Wait()
 	select {
 	case j := <-c:
+		if err := j.Delete(); err != nil {
+			log.Printf("Could not delete job: %v", err)
+			return
+		}
 		if e, ok := scrapeStats[*j.Company.Shortname]; ok {
 			e.NbDeleted++
 			scrapeStats[*j.Company.Shortname] = e
