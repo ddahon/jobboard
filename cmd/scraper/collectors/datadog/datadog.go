@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ddahon/jobboard/cmd/scraper/collectors"
+	"github.com/ddahon/jobboard/cmd/scraper/base"
 	"github.com/ddahon/jobboard/internal/models"
 )
 
@@ -35,13 +35,13 @@ func Scrape() ([]models.Job, error) {
 
 func getAlgoliaParams() (string, string, string, error) {
 	var apiKey, appId, index string
-	jsSrc, err := collectors.FetchFileContent("https://careers.datadoghq.com/assets/scripts/main-YQ6Q5FDQ.js")
+	jsSrc, err := base.FetchFileContent("https://careers.datadoghq.com/assets/scripts/main-YQ6Q5FDQ.js")
 	if err != nil {
 		return apiKey, appId, index, err
 	}
-	apiKey = collectors.GetJsKV(jsSrc, "ALGOLIA_PUBLIC_TOKEN")
-	appId = collectors.GetJsKV(jsSrc, "ALGOLIA_APPLICATION")
-	index = collectors.GetJsKV(jsSrc, "ALGOLIA_INDEX")
+	apiKey = base.GetJsKV(jsSrc, "ALGOLIA_PUBLIC_TOKEN")
+	appId = base.GetJsKV(jsSrc, "ALGOLIA_APPLICATION")
+	index = base.GetJsKV(jsSrc, "ALGOLIA_INDEX")
 
 	return apiKey, appId, index, nil
 }
