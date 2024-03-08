@@ -6,11 +6,12 @@ import (
 	"os"
 
 	"github.com/ddahon/jobboard/cmd/scraper/analytics"
-	"github.com/ddahon/jobboard/cmd/scraper/collectors/canonical"
-	"github.com/ddahon/jobboard/cmd/scraper/collectors/datadog"
-	"github.com/ddahon/jobboard/cmd/scraper/collectors/lumenalta"
-	"github.com/ddahon/jobboard/cmd/scraper/collectors/spacelift"
+
 	"github.com/ddahon/jobboard/internal/pkg/models"
+	"github.com/ddahon/jobboard/internal/scraper/companies/canonical"
+	"github.com/ddahon/jobboard/internal/scraper/companies/datadog"
+	"github.com/ddahon/jobboard/internal/scraper/companies/lumenalta"
+	"github.com/ddahon/jobboard/internal/scraper/companies/spacelift"
 	_ "github.com/lib/pq"
 )
 
