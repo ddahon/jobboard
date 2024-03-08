@@ -1,10 +1,10 @@
-package base
+package scraper
 
 import (
 	"encoding/json"
 	"log"
 
-	"github.com/ddahon/jobboard/internal/models"
+	"github.com/ddahon/jobboard/internal/pkg/models"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -12,11 +12,24 @@ type JobAdapter interface {
 	ToJob() models.Job
 }
 
-type JsScraper[T JobAdapter] struct {
-	ScriptSelector Selector // to get the script src
-	JsVarName      string   // name of JS var that contains the jobs
-	BaseScraper
+type BaseScraper struct {
+	BaseDomain       string
+	StartingUrl      string
+	Company          *models.Company
+	CompanyShortname string
 }
+
+type Selector struct {
+	Type  SelectorType
+	Value string
+}
+
+type SelectorType int
+
+const (
+	HTMLSelector SelectorType = iota
+	XMLSelector
+)
 
 func ScrapeJsVar[T JobAdapter](s Selector, name string, bs BaseScraper) ([]models.Job, error) {
 	var jobs []models.Job

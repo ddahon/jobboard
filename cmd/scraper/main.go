@@ -10,7 +10,7 @@ import (
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/datadog"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/lumenalta"
 	"github.com/ddahon/jobboard/cmd/scraper/collectors/spacelift"
-	"github.com/ddahon/jobboard/internal/models"
+	"github.com/ddahon/jobboard/internal/pkg/models"
 	_ "github.com/lib/pq"
 )
 

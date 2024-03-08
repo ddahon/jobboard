@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/ddahon/jobboard/internal/models"
+	"github.com/ddahon/jobboard/internal/pkg/models"
 	"github.com/gocolly/colly/v2"
 )
 

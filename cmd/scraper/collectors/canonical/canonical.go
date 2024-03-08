@@ -3,8 +3,8 @@ package canonical
 import (
 	"errors"
 
-	"github.com/ddahon/jobboard/cmd/scraper/base"
-	"github.com/ddahon/jobboard/internal/models"
+	"github.com/ddahon/jobboard/internal/pkg/models"
+	"github.com/ddahon/jobboard/internal/scraper"
 )
 
 var company *models.Company
@@ -15,13 +15,13 @@ func Scrape() ([]models.Job, error) {
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
-	return base.ScrapeJsVar[canonicalJob](
-		base.Selector{
-			Type:  base.HTMLSelector,
+	return scraper.ScrapeJsVar[canonicalJob](
+		scraper.Selector{
+			Type:  scraper.HTMLSelector,
 			Value: `script[type="text/javascript"]`,
 		},
 		"vacancies",
-		base.BaseScraper{
+		scraper.BaseScraper{
 			BaseDomain:  "canonical.com",
 			StartingUrl: "https://canonical.com/careers/all",
 		},

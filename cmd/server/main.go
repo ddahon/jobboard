@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ddahon/jobboard/cmd/server/views"
-	"github.com/ddahon/jobboard/internal/models"
+	"github.com/ddahon/jobboard/internal/pkg/models"
 	_ "github.com/lib/pq"
 )
 

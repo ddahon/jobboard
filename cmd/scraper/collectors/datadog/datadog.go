@@ -9,14 +9,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ddahon/jobboard/cmd/scraper/base"
-	"github.com/ddahon/jobboard/internal/models"
+	"github.com/ddahon/jobboard/internal/pkg/models"
+	"github.com/ddahon/jobboard/internal/scraper"
 )
 
 var companyShortname = "datadog"
-var baseDomain = "careers.datadoghq.com"
-var baseUrl = "https://" + baseDomain
-var startingUrl = baseUrl + "/remote"
 var company *models.Company
 
 func Scrape() ([]models.Job, error) {
@@ -35,13 +32,13 @@ func Scrape() ([]models.Job, error) {
 
 func getAlgoliaParams() (string, string, string, error) {
 	var apiKey, appId, index string
-	jsSrc, err := base.FetchFileContent("https://careers.datadoghq.com/assets/scripts/main-YQ6Q5FDQ.js")
+	jsSrc, err := scraper.FetchFileContent("https://careers.datadoghq.com/assets/scripts/main-YQ6Q5FDQ.js")
 	if err != nil {
 		return apiKey, appId, index, err
 	}
-	apiKey = base.GetJsKV(jsSrc, "ALGOLIA_PUBLIC_TOKEN")
-	appId = base.GetJsKV(jsSrc, "ALGOLIA_APPLICATION")
-	index = base.GetJsKV(jsSrc, "ALGOLIA_INDEX")
+	apiKey = scraper.GetJsKV(jsSrc, "ALGOLIA_PUBLIC_TOKEN")
+	appId = scraper.GetJsKV(jsSrc, "ALGOLIA_APPLICATION")
+	index = scraper.GetJsKV(jsSrc, "ALGOLIA_INDEX")
 
 	return apiKey, appId, index, nil
 }
