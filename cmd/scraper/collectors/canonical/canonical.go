@@ -10,24 +10,22 @@ import (
 var company *models.Company
 var companyShortname = "canonical"
 
-var CanonicalScraper = base.JsScraper[canonicalJob]{
-	ScriptSelector: base.Selector{
-		Type:  base.HTMLSelector,
-		Value: `script[type="text/javascript"]`,
-	},
-	JsVarName: "vacancies",
-	BaseScraper: base.BaseScraper{
-		BaseDomain:  "canonical.com",
-		StartingUrl: "https://canonical.com/careers/all",
-	},
-}
-
 func Scrape() ([]models.Job, error) {
 	company = models.GetCompanyByShortname(companyShortname)
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
-	return CanonicalScraper.Scrape()
+	return base.ScrapeJsVar[canonicalJob](
+		base.Selector{
+			Type:  base.HTMLSelector,
+			Value: `script[type="text/javascript"]`,
+		},
+		"vacancies",
+		base.BaseScraper{
+			BaseDomain:  "canonical.com",
+			StartingUrl: "https://canonical.com/careers/all",
+		},
+	)
 }
 
 type canonicalJob struct {

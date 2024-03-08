@@ -18,14 +18,14 @@ type JsScraper[T JobAdapter] struct {
 	BaseScraper
 }
 
-func (s *JsScraper[T]) Scrape() ([]models.Job, error) {
+func ScrapeJsVar[T JobAdapter](s Selector, name string, bs BaseScraper) ([]models.Job, error) {
 	var jobs []models.Job
 
-	c := colly.NewCollector(colly.AllowedDomains(s.BaseDomain))
-	if s.ScriptSelector.Type == HTMLSelector {
-		c.OnHTML(s.ScriptSelector.Value, func(h *colly.HTMLElement) {
+	c := colly.NewCollector(colly.AllowedDomains(bs.BaseDomain))
+	if s.Type == HTMLSelector {
+		c.OnHTML(s.Value, func(h *colly.HTMLElement) {
 			jsSrc := h.Text
-			v, err := GetJsArrayVar(jsSrc, s.JsVarName)
+			v, err := GetJsArrayVar(jsSrc, name)
 			if err != nil {
 				log.Printf("Error while parsing js script: %v", err)
 				return
@@ -39,7 +39,7 @@ func (s *JsScraper[T]) Scrape() ([]models.Job, error) {
 			}
 		})
 	}
-	err := c.Visit(s.StartingUrl)
+	err := c.Visit(bs.StartingUrl)
 
 	return jobs, err
 }
