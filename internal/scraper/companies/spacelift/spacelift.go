@@ -2,10 +2,9 @@ package spacelift
 
 import (
 	"errors"
-	"log"
 
 	"github.com/ddahon/jobboard/internal/pkg/models"
-	"github.com/gocolly/colly/v2"
+	"github.com/ddahon/jobboard/internal/scraper"
 )
 
 var companyShortname = "spacelift"
@@ -18,49 +17,13 @@ func Scrape() ([]models.Job, error) {
 	if company == nil {
 		return nil, errors.New("Cannot retrieve company for shortname " + companyShortname + ". Aborting scraping for this company.")
 	}
-	jobLinks, err := getJobLinks()
+	bs := scraper.BaseScraper{BaseDomain: "careers.spacelift.io", StartingUrl: "https://careers.spacelift.io/jobs", Company: company, CompanyShortname: companyShortname}
+	jobLinks, err := scraper.GetJobLinks(scraper.Selector{Type: scraper.HTMLSelector, Value: "#jobs_list_container a[href]"}, bs)
 	if err != nil {
 		return nil, err
 	}
-
-	return extractJobInfo(jobLinks)
-}
-
-func getJobLinks() ([]string, error) {
-	var jobLinks []string
-	c := colly.NewCollector(colly.AllowedDomains(baseDomain))
-	c.OnHTML("#jobs_list_container a[href]", func(h *colly.HTMLElement) {
-		jobLinks = append(jobLinks, h.Attr("href"))
-	})
-	err := c.Visit(baseUrl + "/jobs")
-	return jobLinks, err
-}
-
-func extractJobInfo(urls []string) ([]models.Job, error) {
-	jobs := make([]models.Job, 0)
-	c := colly.NewCollector(colly.AllowedDomains(baseDomain))
-	c.OnScraped(func(r *colly.Response) {
-		jobs[len(jobs)-1].Link = r.Request.URL.String()
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Failed to visit %v: %v", r.Request.URL, err)
-	})
-	c.OnHTML("dt:contains('Remote status') + dd", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Location = h.Text
-	})
-	c.OnHTML("main > section:nth-of-type(2)", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Description = h.Text
-	})
-	c.OnHTML("h1.font-company-header", func(h *colly.HTMLElement) {
-		jobs[len(jobs)-1].Title = h.Text
-	})
-
-	for _, url := range urls {
-		job := models.Job{Company: company}
-		jobs = append(jobs, job)
-		if err := c.Visit(url); err != nil {
-			log.Printf("Error while extracting job info in %v: %v", url, err)
-		}
-	}
-	return jobs, nil
+	locSelector := scraper.Selector{Type: scraper.HTMLSelector, Value: "dt:contains('Remote status') + dd"}
+	descSelector := scraper.Selector{Type: scraper.HTMLSelector, Value: "main > section:nth-of-type(2)"}
+	titleSelector := scraper.Selector{Type: scraper.HTMLSelector, Value: "h1.font-company-header"}
+	return scraper.ExtractJobInfo(jobLinks, locSelector, descSelector, titleSelector, bs)
 }
