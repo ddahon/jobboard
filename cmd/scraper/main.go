@@ -8,25 +8,14 @@ import (
 	"github.com/ddahon/jobboard/cmd/scraper/analytics"
 
 	"github.com/ddahon/jobboard/internal/pkg/models"
-	"github.com/ddahon/jobboard/internal/scraper/companies/canonical"
-	"github.com/ddahon/jobboard/internal/scraper/companies/datadog"
-	"github.com/ddahon/jobboard/internal/scraper/companies/lumenalta"
-	"github.com/ddahon/jobboard/internal/scraper/companies/spacelift"
+	"github.com/ddahon/jobboard/internal/scraper/companies"
 	_ "github.com/lib/pq"
 )
 
-type ScrapeFunc func() ([]models.Job, error)
-
-var allCollectors = map[string]ScrapeFunc{
-	"datadog":   datadog.Scrape,
-	"spacelift": spacelift.Scrape,
-	"canonical": canonical.Scrape,
-	"lumenalta": lumenalta.Scrape,
-}
-
 func main() {
+	collectors := companies.AllCollectors
 	if len(os.Args) > 1 {
-		updateCollectorsList(os.Args)
+		collectors = updateCollectorsList(os.Args)
 	}
 
 	connStr := "postgresql://postgres:password@localhost:5432/jobs?sslmode=disable"
@@ -36,7 +25,7 @@ func main() {
 
 	scrapeStats := map[string]analytics.ScrapeResult{}
 
-	for name, scrape := range allCollectors {
+	for name, scrape := range collectors {
 		retries := 3
 		jobs, fails := getJobs(retries, name, scrape)
 		if jobs == nil {
@@ -60,7 +49,7 @@ func main() {
 	}
 }
 
-func getJobs(retries int, company string, scrape ScrapeFunc) ([]models.Job, int) {
+func getJobs(retries int, company string, scrape companies.ScrapeFunc) ([]models.Job, int) {
 	fails := 0
 	var jobs []models.Job
 	var err error
@@ -81,12 +70,12 @@ func getJobs(retries int, company string, scrape ScrapeFunc) ([]models.Job, int)
 	return jobs, fails
 }
 
-func updateCollectorsList(args []string) {
-	newCollectors := map[string]ScrapeFunc{}
+func updateCollectorsList(args []string) map[string]companies.ScrapeFunc {
+	newCollectors := map[string]companies.ScrapeFunc{}
 	for _, e := range args {
-		if val, ok := allCollectors[e]; ok {
+		if val, ok := companies.AllCollectors[e]; ok {
 			newCollectors[e] = val
 		}
 	}
-	allCollectors = newCollectors
+	return newCollectors
 }
