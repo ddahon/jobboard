@@ -15,7 +15,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var allCollectors = map[string]func() ([]models.Job, error){
+type ScrapeFunc func() ([]models.Job, error)
+
+var allCollectors = map[string]ScrapeFunc{
 	"datadog":   datadog.Scrape,
 	"spacelift": spacelift.Scrape,
 	"canonical": canonical.Scrape,
@@ -35,25 +37,19 @@ func main() {
 	scrapeStats := map[string]analytics.ScrapeResult{}
 
 	for name, scrape := range allCollectors {
-		nbFound := 0
-		log.Println("starting scraping of company:", name)
-		jobs, err := scrape()
-		if err != nil {
-			log.Printf("failed to scrape %v: %v\n", name, err)
-			scrapeStats[name] = analytics.ScrapeResult{Failed: true}
-			continue
-		}
+		retries := 3
+		jobs, fails := getJobs(retries, name, scrape)
 		if jobs == nil {
-			log.Printf("no jobs found for company %v", name)
 			continue
 		}
+		nbFound := 0
 		for _, job := range jobs {
 			if err := job.Save(); err != nil {
 				log.Printf("Failed to register job in DB: %v", err)
 			}
 			nbFound++
 		}
-		scrapeStats[name] = analytics.ScrapeResult{NbFound: nbFound}
+		scrapeStats[name] = analytics.ScrapeResult{NbFound: nbFound, Failed: retries == fails, Retries: fails}
 	}
 
 	models.DeleteDeadJobs(scrapeStats)
@@ -64,8 +60,29 @@ func main() {
 	}
 }
 
+func getJobs(retries int, company string, scrape ScrapeFunc) ([]models.Job, int) {
+	fails := 0
+	var jobs []models.Job
+	var err error
+	log.Println("starting scraping of company:", company)
+	for i := 0; i < retries; i++ {
+		jobs, err = scrape()
+		if err != nil {
+			log.Printf("failed to scrape %v: %v\n", company, err)
+			fails++
+			continue
+		}
+		if jobs == nil {
+			log.Printf("no jobs found for company %v", company)
+			fails++
+			continue
+		}
+	}
+	return jobs, fails
+}
+
 func updateCollectorsList(args []string) {
-	newCollectors := map[string]func() ([]models.Job, error){}
+	newCollectors := map[string]ScrapeFunc{}
 	for _, e := range args {
 		if val, ok := allCollectors[e]; ok {
 			newCollectors[e] = val
