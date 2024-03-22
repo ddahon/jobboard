@@ -1,0 +1,33 @@
+package views
+
+import "github.com/ddahon/jobboard/internal/models"
+
+templ Index(jobs []models.Job) {
+	<html>
+		<head>
+			<script src="https://cdn.tailwindcss.com"></script>
+		</head>
+		<body>
+			<div class="overflow-x-auto px-96 py-6 justify-center flex flex-row">
+				<table class="divide-y-2 divide-gray-200 bg-white text-sm">
+					<tbody class="divide-y divide-gray-200">
+						for _, job := range jobs {
+							<tr>
+								<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">{ job.Title }</td>
+								<td class="whitespace-nowrap px-4 py-2">
+									<a
+										href={ templ.URL(job.Link) }
+										target="_blank"
+										class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+									>
+										View
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</body>
+	</html>
+}

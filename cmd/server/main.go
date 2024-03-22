@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
+	"github.com/ddahon/jobboard/cmd/server/views"
 	"github.com/ddahon/jobboard/internal/pkg/models"
 	_ "github.com/lib/pq"
 )
@@ -22,14 +22,12 @@ func main() {
 		log.Fatalf("Failed to retrieve jobs from DB: %v", err)
 	}
 
-	vueAppPath := os.Getenv("VUE_APP_PATH")
-	if vueAppPath == "" {
-		panic("VUE_APP_PATH environment variable is not set")
-	}
-	log.Printf("Found %v jobs", len(jobs))
-	server := http.NewServeMux()
-	server.Handle("/", http.FileServer(http.Dir(vueAppPath)))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if err := views.Index(jobs).Render(r.Context(), w); err != nil {
+			log.Printf("Failed to respond to request: %v", err)
+		}
 
+	})
 	log.Println("Starting to listen on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", server))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

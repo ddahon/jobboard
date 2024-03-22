@@ -3,5 +3,3 @@ TODO.md
 scraping_notes.md
 bin/
 .vscode/
-web/node_modules/
-web/dist/
