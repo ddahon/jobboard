@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
@@ -10,7 +12,7 @@ var allCompanies []Company
 
 func InitDB(connStr string) error {
 	var err error
-	db, err = sql.Open("postgres", connStr)
+	db, err = sql.Open("sqlite3", connStr)
 	if err != nil {
 		return err
 

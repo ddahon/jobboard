@@ -9,7 +9,6 @@ import (
 
 	"github.com/ddahon/jobboard/internal/pkg/models"
 	"github.com/ddahon/jobboard/internal/scraper/companies"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -18,7 +17,7 @@ func main() {
 		collectors = updateCollectorsList(os.Args)
 	}
 
-	connStr := "postgresql://postgres:password@localhost:5432/jobs?sslmode=disable"
+	connStr := os.Getenv("SQLITE_DB")
 	if err := models.InitDB(connStr); err != nil {
 		log.Fatalln(err)
 	}

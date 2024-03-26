@@ -3,15 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ddahon/jobboard/cmd/server/views"
 	"github.com/ddahon/jobboard/internal/pkg/models"
-	_ "github.com/lib/pq"
 )
 
 func main() {
 	var err error
-	connStr := "postgresql://postgres:password@localhost:5432/jobs?sslmode=disable"
+	connStr := os.Getenv("SQLITE_DB")
+	log.Println(connStr)
 	err = models.InitDB(connStr)
 	if err != nil {
 		log.Fatalln(err)

@@ -27,7 +27,7 @@ func (j Job) Save() error {
 	exists, id := CheckJobExists(j.Link)
 	if exists {
 		log.Printf("Job with link %v already exists. Updating existing definition", j.Link)
-		_, err := db.Exec("UPDATE jobs SET description=$1, title=$2, location=$3, updated_at=$4 WHERE id=$5", strings.TrimSpace(j.Description), strings.TrimSpace(j.Title), strings.TrimSpace(j.Location), time.Now(), id)
+		_, err := db.Exec("UPDATE jobs SET description=$1, title=$2, location=$3, updated_at=$4 WHERE rowid=$5", strings.TrimSpace(j.Description), strings.TrimSpace(j.Title), strings.TrimSpace(j.Location), time.Now(), id)
 		return err
 	}
 	_, err := db.Exec("INSERT INTO jobs (description, title, link, company_id, location) VALUES ($1, $2, $3, $4, $5)", strings.TrimSpace(j.Description), strings.TrimSpace(j.Title), strings.TrimSpace(j.Link), j.Company.Id, strings.TrimSpace(j.Location))
@@ -35,7 +35,7 @@ func (j Job) Save() error {
 }
 
 func (j Job) Delete() error {
-	_, err := db.Exec("DELETE FROM jobs WHERE id=$1", j.Id)
+	_, err := db.Exec("DELETE FROM jobs WHERE rowid=$1", j.Id)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 
 func GetAllJobs() ([]Job, error) {
 	var jobs []Job
-	res, err := db.Query("SELECT * FROM jobs")
+	res, err := db.Query("SELECT rowid, * FROM jobs")
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func GetAllJobs() ([]Job, error) {
 // CheckJobExists returns a boolean representing if the job exists and a  job id if it exists.
 func CheckJobExists(link string) (bool, uint) {
 	var id uint
-	res, err := db.Query("SELECT id FROM jobs WHERE link=$1", link)
+	res, err := db.Query("SELECT rowid FROM jobs WHERE link=$1", link)
 	if err != nil {
 		log.Printf("Error while checking if job exists: %v", err)
 		return true, id
@@ -120,7 +120,7 @@ func NewJob(rows *sql.Rows) (Job, error) {
 	var j Job
 	var companyId uint
 	var description, title, link, location, category sql.NullString
-	if err := rows.Scan(&j.Id, &description, &title, &link, &companyId, &j.CreatedAt, &j.UpdatedAt, &location, &category); err != nil {
+	if err := rows.Scan(&j.Id, &description, &title, &link, &location, &category, &j.CreatedAt, &j.UpdatedAt, &companyId); err != nil {
 		return j, err
 	}
 	if description.Valid {
