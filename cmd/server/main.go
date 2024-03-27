@@ -19,6 +19,7 @@ func main() {
 	var err error
 	dbPath := viper.GetString("dbPath")
 	port := viper.GetString("port")
+	sslEnabled := viper.GetBool("sslEnabled")
 	err = models.InitDB(dbPath)
 	if err != nil {
 		log.Fatalln(err)
@@ -35,7 +36,7 @@ func main() {
 		}
 
 	})
-	if port == "443" {
+	if sslEnabled {
 		certFile := viper.GetString("sslCertFile")
 		keyFile := viper.GetString("sslKeyFile")
 		log.Fatal(http.ListenAndServeTLS(":443", certFile, keyFile, nil))
