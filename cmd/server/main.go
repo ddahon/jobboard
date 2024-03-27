@@ -39,7 +39,7 @@ func main() {
 	if sslEnabled {
 		certFile := viper.GetString("sslCertFile")
 		keyFile := viper.GetString("sslKeyFile")
-		log.Fatal(http.ListenAndServeTLS(":443", certFile, keyFile, nil))
+		log.Fatal(http.ListenAndServeTLS(":"+port, certFile, keyFile, nil))
 	} else {
 		log.Fatal(http.ListenAndServe(":"+port, nil))
 	}
