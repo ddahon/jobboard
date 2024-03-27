@@ -1,0 +1,4 @@
+dbPath: /path/to/sqlite/db
+port: 8080
+sslCertFile: path/to/cert/file
+sslKeyFile: path/to/key/file
