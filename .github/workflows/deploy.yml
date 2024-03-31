@@ -16,6 +16,6 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
     - name: connect and pull
-      run: ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} bash -l "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && make server && make scraper && systemctl restart jobboard.service && exit"
+      run: ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} bash -l "cd ${{ secrets.WORK_DIR }} && git checkout main && git pull && make server && make scraper && sudo systemctl restart jobboard.service && exit"
     - name: cleanup
       run: rm -rf ~/.ssh
