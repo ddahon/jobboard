@@ -53,7 +53,7 @@ func main() {
 	if sslEnabled {
 		certFile := viper.GetString("sslCertFile")
 		keyFile := viper.GetString("sslKeyFile")
-		go log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(redirect)))
+		go http.ListenAndServe(":8080", http.HandlerFunc(redirect))
 		log.Fatal(http.ListenAndServeTLS(":"+port, certFile, keyFile, nil))
 	} else {
 		log.Fatal(http.ListenAndServe(":"+port, nil))
