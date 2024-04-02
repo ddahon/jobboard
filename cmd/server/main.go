@@ -15,7 +15,7 @@ import (
 func redirect(w http.ResponseWriter, req *http.Request) {
 	// remove/add not default ports from req.Host
 	host := strings.Split(req.Host, ":")[0]
-	target := "https://" + host + ":8080" + req.URL.Path
+	target := "https://" + host + req.URL.Path
 	if len(req.URL.RawQuery) > 0 {
 		target += "?" + req.URL.RawQuery
 	}
