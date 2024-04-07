@@ -1,3 +1,4 @@
+SHELL = /bin/bash
 scrape:
 	@go build -o bin ./cmd/scraper
 
