@@ -10,51 +10,59 @@ templ Index(jobs []models.Job) {
 			<script src="//unpkg.com/alpinejs" defer></script>
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
 		</head>
-		<body x-data="{ isListView: false }">
-			<section class="bg-gray-800">
-				<div class="mx-auto max-w-screen-xl px-4 py-20 lg:flex lg:h-screen lg:items-center">
-					<div class="mx-auto max-w-5xl text-center">
-						<h1 class="text-3xl font-extrabold sm:text-5xl text-white">
-							Stop sifting through irrelevant postings.
-							<strong class="font-extrabold text-indigo-600 sm:block">Find the best remote jobs from Europe.</strong>
-						</h1>
-						<p class="mt-4 sm:text-xl/relaxed text-white">
-							Remote Jobs in Europe from a hand-curated list of companies.
-						</p>
-						<div class="mt-8 flex flex-wrap justify-center gap-4">
-							<a
-								class="block w-full rounded bg-indigo-600 px-12 py-3 text-sm font-medium text-white shadow hover:bg-indigo-700 focus:outline-none focus:ring active:bg-indigo-500 sm:w-auto"
-								href="#jobs"
-							>
-								View jobs
-							</a>
-						</div>
-					</div>
-				</div>
-			</section>
-			<div class="overflow-x-auto px-96 py-6 bg-gray-900" id="jobs" x-bind:class="{'flex flex-wrap justify-center': !isListView, 'flex flex-col': isListView}">
-				<div class="flex justify-end w-full mb-4 items-center">
-					<i class="fa-solid fa-table-cells text-gray-400 mr-2"></i>
-					<label
-						for="AcceptConditions"
-						class="relative h-8 w-14 cursor-pointer rounded-full transition [-webkit-tap-highlight-color:_transparent] bg-indigo-600"
-					>
-						<input x-model="isListView" type="checkbox" id="AcceptConditions" class="sr-only"/>
-						<span
-							:class="{ 'start-0': !isListView, 'start-6': isListView }"
-							class="absolute inset-y-0 m-1 size-6 rounded-full bg-white transition-all"
-						></span>
-					</label>
-					<i class="fa-solid fa-list text-gray-400 ml-2"></i>
-				</div>
-				for _, job := range jobs {
-					<div x-bind:class="{'w-1/3 p-2': !isListView, 'w-full p-2': isListView}">
-						<div class="h-32 rounded-lg">
-							@components.JobCard(job)
-						</div>
-					</div>
-				}
-			</div>
+		<body>
+			@HomeBanner()
+			@JobResults(jobs)
 		</body>
 	</html>
+}
+
+templ HomeBanner() {
+	<section class="bg-gray-800">
+		<div class="mx-auto max-w-screen-xl px-4 py-20 lg:flex lg:h-screen lg:items-center">
+			<div class="mx-auto max-w-5xl text-center">
+				<h1 class="text-3xl font-extrabold sm:text-5xl text-white">
+					Stop sifting through irrelevant postings.
+					<strong class="font-extrabold text-indigo-600 sm:block">Find the best remote jobs from Europe.</strong>
+				</h1>
+				<p class="mt-4 sm:text-xl/relaxed text-white">
+					Remote Jobs in Europe from a hand-curated list of companies.
+				</p>
+				<div class="mt-8 flex flex-wrap justify-center gap-4">
+					<a
+						class="block w-full rounded bg-indigo-600 px-12 py-3 text-sm font-medium text-white shadow hover:bg-indigo-700 focus:outline-none focus:ring active:bg-indigo-500 sm:w-auto"
+						href="#jobs"
+					>
+						View jobs
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
+}
+
+templ JobResults(jobs []models.Job) {
+	<div class="overflow-x-auto px-96 py-6 bg-gray-900" id="jobs" x-data="{ isListView: false }" x-bind:class="{'flex flex-wrap justify-center': !isListView, 'flex flex-col': isListView}">
+		<div class="flex justify-end w-full mb-4 items-center">
+			<i class="fa-solid fa-table-cells text-gray-400 mr-2"></i>
+			<label
+				for="AcceptConditions"
+				class="relative h-8 w-14 cursor-pointer rounded-full transition [-webkit-tap-highlight-color:_transparent] bg-indigo-600"
+			>
+				<input x-model="isListView" type="checkbox" id="AcceptConditions" class="sr-only"/>
+				<span
+					:class="{ 'start-0': !isListView, 'start-6': isListView }"
+					class="absolute inset-y-0 m-1 size-6 rounded-full bg-white transition-all"
+				></span>
+			</label>
+			<i class="fa-solid fa-list text-gray-400 ml-2"></i>
+		</div>
+		for _, job := range jobs {
+			<div x-bind:class="{'w-1/3 p-2': !isListView, 'w-full p-2': isListView}">
+				<div class="h-32 rounded-lg">
+					@components.JobCard(job)
+				</div>
+			</div>
+		}
+	</div>
 }
