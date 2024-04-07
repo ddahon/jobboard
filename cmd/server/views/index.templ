@@ -35,16 +35,16 @@ templ Index(jobs []models.Job) {
 			<div class="overflow-x-auto px-96 py-6 bg-gray-900" id="jobs" x-bind:class="{'flex flex-wrap justify-center': !isListView, 'flex flex-col': isListView}">
 				<div class="flex justify-end w-full mb-4 items-center">
 					<i class="fa-solid fa-table-cells text-gray-400 mr-2"></i>
-					<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-						<input
-							type="checkbox"
-							name="toggle"
-							id="toggle"
-							class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer checked:translate-x-3/4"
-							x-model="isListView"
-						/>
-						<label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-indigo-600 cursor-pointer"></label>
-					</div>
+					<label
+						for="AcceptConditions"
+						class="relative h-8 w-14 cursor-pointer rounded-full transition [-webkit-tap-highlight-color:_transparent] bg-indigo-600"
+					>
+						<input x-model="isListView" type="checkbox" id="AcceptConditions" class="sr-only"/>
+						<span
+							:class="{ 'start-0': !isListView, 'start-6': isListView }"
+							class="absolute inset-y-0 m-1 size-6 rounded-full bg-white transition-all"
+						></span>
+					</label>
 					<i class="fa-solid fa-list text-gray-400 ml-2"></i>
 				</div>
 				for _, job := range jobs {
