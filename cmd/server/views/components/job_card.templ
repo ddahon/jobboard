@@ -3,8 +3,8 @@ package components
 import "github.com/ddahon/jobboard/internal/pkg/models"
 
 templ JobCard(job models.Job) {
-	<article class="rounded-xl border border-gray-700 bg-gray-800 p-4">
-		<div class="flex items-center gap-4">
+	<article class="rounded-xl border border-gray-700 bg-gray-800 p-4 h-full flex flex-col">
+		<div class="flex items-center gap-4 flex-grow">
 			<div>
 				<h3 class="text-lg font-medium text-white">{ job.Title }</h3>
 				<div class="flow-root">

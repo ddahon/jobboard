@@ -33,8 +33,10 @@ templ Index(jobs []models.Job) {
 			</section>
 			<div class="overflow-x-auto px-96 py-6 justify-center flex flex-wrap bg-gray-900" id="jobs">
 				for _, job := range jobs {
-					<div class="w-1/3 h-32 rounded-lg p-2">
-						@components.JobCard(job)
+					<div class="w-1/3 p-2">
+						<div class="h-32 rounded-lg">
+							@components.JobCard(job)
+						</div>
 					</div>
 				}
 			</div>
