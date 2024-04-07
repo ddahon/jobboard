@@ -1,6 +1,7 @@
 package views
 
 import "github.com/ddahon/jobboard/internal/pkg/models"
+import "github.com/ddahon/jobboard/cmd/server/views/components"
 
 templ Index(jobs []models.Job) {
 	<html class="scroll-smooth">
@@ -30,22 +31,12 @@ templ Index(jobs []models.Job) {
 					</div>
 				</div>
 			</section>
-			<div class="overflow-x-auto px-96 py-6 justify-center flex flex-row bg-gray-900">
-				<table class="divide-y-3 divide-gray-200 text-lg" id="jobs">
-					for _, job := range jobs {
-						<tr>
-							<td class="whitespace-nowrap px-4 py-2">
-								<a
-									href={ templ.URL(job.Link) }
-									target="_blank"
-									class="inline-block px-4 py-2 text-base font-medium text-white hover:bg-indigo-700"
-								>
-									{ job.Title }
-								</a>
-							</td>
-						</tr>
-					}
-				</table>
+			<div class="overflow-x-auto px-96 py-6 justify-center flex flex-wrap bg-gray-900" id="jobs">
+				for _, job := range jobs {
+					<div class="w-1/3 h-32 rounded-lg p-2">
+						@components.JobCard(job)
+					</div>
+				}
 			</div>
 		</body>
 	</html>
