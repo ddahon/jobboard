@@ -53,6 +53,7 @@ func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 	jobs, err := GetAllJobs()
 	if err != nil {
 		log.Printf("Could not retrieve jobs: %v. Skipping dead links checking", err)
+		return
 	}
 	c := make(chan Job, len(jobs))
 	var wg sync.WaitGroup
@@ -66,9 +67,11 @@ func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 			c <- j
 		}(j)
 	}
-	wg.Wait()
-	select {
-	case j := <-c:
+	go func() {
+		wg.Wait()
+		close(c)
+	}()
+	for j := range c {
 		if err := j.Delete(); err != nil {
 			log.Printf("Could not delete job: %v", err)
 			return
@@ -77,8 +80,6 @@ func DeleteDeadJobs(scrapeStats map[string]analytics.ScrapeResult) {
 			e.NbDeleted++
 			scrapeStats[*j.Company.Shortname] = e
 		}
-	default:
-		return
 	}
 }
 
