@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"log"
-	"os"
 
 	"github.com/ddahon/jobboard/cmd/scraper/analytics"
 
@@ -14,16 +13,12 @@ import (
 
 func main() {
 	var clean bool
-	flag.BoolVar(&clean, "clean", false, "delete dead jobs")
-	flag.Parse()
+	var sqliteDB string
+	var collectors map[string]companies.ScrapeFunc
 
-	collectors := companies.AllCollectors
-	if len(flag.Args()) > 0 {
-		collectors = updateCollectorsList(flag.Args())
-	}
+	collectors, clean, sqliteDB = parseArguments()
 
-	connStr := os.Getenv("SQLITE_DB")
-	if err := models.InitDB(connStr); err != nil {
+	if err := models.InitDB(sqliteDB); err != nil {
 		log.Fatalln(err)
 	}
 
@@ -53,6 +48,25 @@ func main() {
 	if err == nil {
 		log.Println(string(b))
 	}
+}
+
+func parseArguments() (map[string]companies.ScrapeFunc, bool, string) {
+	var clean bool
+	var sqliteDB string
+	flag.BoolVar(&clean, "clean", false, "delete dead jobs")
+	flag.StringVar(&sqliteDB, "sqlite-db", "", "SQLite database connection string")
+	flag.Parse()
+
+	collectors := companies.AllCollectors
+	if len(flag.Args()) > 0 {
+		collectors = updateCollectorsList(flag.Args())
+	}
+
+	if sqliteDB == "" {
+		log.Fatal("Please provide the SQLite database connection string using the -sqlite-db flag")
+	}
+
+	return collectors, clean, sqliteDB
 }
 
 func getJobs(retries int, company string, scrape companies.ScrapeFunc) ([]models.Job, int) {
