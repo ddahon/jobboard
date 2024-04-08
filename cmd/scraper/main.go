@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"os"
 
@@ -12,9 +13,13 @@ import (
 )
 
 func main() {
+	var clean bool
+	flag.BoolVar(&clean, "clean", false, "delete dead jobs")
+	flag.Parse()
+
 	collectors := companies.AllCollectors
-	if len(os.Args) > 1 {
-		collectors = updateCollectorsList(os.Args)
+	if len(flag.Args()) > 0 {
+		collectors = updateCollectorsList(flag.Args())
 	}
 
 	connStr := os.Getenv("SQLITE_DB")
@@ -40,7 +45,9 @@ func main() {
 		scrapeStats[name] = analytics.ScrapeResult{NbFound: nbFound, Failed: retries == fails, Retries: fails}
 	}
 
-	models.DeleteDeadJobs(scrapeStats)
+	if clean {
+		models.DeleteDeadJobs(scrapeStats)
+	}
 
 	b, err := json.MarshalIndent(scrapeStats, "", "  ")
 	if err == nil {
