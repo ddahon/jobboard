@@ -26,7 +26,7 @@ func main() {
 
 	for name, scrape := range collectors {
 		retries := 3
-		jobs, fails := getJobs(retries, name, scrape)
+		jobs, fails := executeScrape(retries, name, scrape)
 		if jobs == nil {
 			continue
 		}
@@ -69,7 +69,7 @@ func parseArguments() (map[string]companies.ScrapeFunc, bool, string) {
 	return collectors, clean, sqliteDB
 }
 
-func getJobs(retries int, company string, scrape companies.ScrapeFunc) ([]models.Job, int) {
+func executeScrape(retries int, company string, scrape companies.ScrapeFunc) ([]models.Job, int) {
 	fails := 0
 	var jobs []models.Job
 	var err error
@@ -86,6 +86,7 @@ func getJobs(retries int, company string, scrape companies.ScrapeFunc) ([]models
 			fails++
 			continue
 		}
+		break
 	}
 	return jobs, fails
 }
