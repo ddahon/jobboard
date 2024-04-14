@@ -46,10 +46,10 @@ templ JobResults(jobs []models.Job) {
 		<div class="flex justify-end w-full mb-4 items-center">
 			<i class="fa-solid fa-table-cells text-gray-400 mr-2"></i>
 			<label
-				for="AcceptConditions"
+				for="listViewTrigger"
 				class="relative h-8 w-14 cursor-pointer rounded-full transition [-webkit-tap-highlight-color:_transparent] bg-indigo-600"
 			>
-				<input x-model="isListView" type="checkbox" id="AcceptConditions" class="sr-only"/>
+				<input x-model="isListView" type="checkbox" id="listViewTrigger" class="sr-only"/>
 				<span
 					:class="{ 'start-0': !isListView, 'start-6': isListView }"
 					class="absolute inset-y-0 m-1 size-6 rounded-full bg-white transition-all"

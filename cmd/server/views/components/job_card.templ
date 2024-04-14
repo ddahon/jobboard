@@ -3,18 +3,8 @@ package components
 import "github.com/ddahon/jobboard/internal/pkg/models"
 
 templ JobCard(job models.Job) {
-	<article class="rounded-xl border border-gray-700 bg-indigo-600 hover:bg-indigo-700 p-4 h-full">
-		<div class="flex items-center gap-4 flex-grow">
-			<div>
-				<h3 class="text-lg font-medium text-white">{ job.Title }</h3>
-				<div class="flow-root">
-					<ul class="-m-1 flex flex-wrap">
-						<li class="p-1 leading-none">
-							<a href={ templ.URL(*job.Company.Website) } class="text-xs font-medium text-gray-300" target="_blank" rel="noopener noreferrer">{ *job.Company.Name }</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	</article>
+	<a href={ templ.URL(job.Link) } target="_blank" rel="noopener noreferrer" class="block h-full p-6 border border-gray-200 rounded-lg shadow hover:bg-indigo-700 bg-gray-800">
+		<h5 class="mb-2 text-xl font-bold tracking-tight text-white">{ job.Title }</h5>
+		<p class="font-normal text-gray-400">{ *job.Company.Name }</p>
+	</a>
 }
