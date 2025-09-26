@@ -4,3 +4,4 @@ scraping_notes.md
 bin/
 .vscode/
 **/*_templ.txt
+*.db

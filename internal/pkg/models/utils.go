@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var db *sql.DB
@@ -12,7 +12,7 @@ var allCompanies []Company
 
 func InitDB(connStr string) error {
 	var err error
-	db, err = sql.Open("sqlite3", connStr)
+	db, err = sql.Open("sqlite", connStr)
 	if err != nil {
 		return err
 
