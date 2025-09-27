@@ -2,7 +2,7 @@ ARG DB_PATH="/app/jobboard.db"
 FROM golang:1.25 AS builder
 WORKDIR /app
 COPY . .
-RUN make scraper
+RUN make scrape
 
 FROM scratch
 WORKDIR /app
