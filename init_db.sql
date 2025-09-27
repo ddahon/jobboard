@@ -1,4 +1,5 @@
 CREATE TABLE companies (
+	id INTEGER,
 	name TEXT,
 	description TEXT,
 	website TEXT,
