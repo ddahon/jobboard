@@ -2,4 +2,4 @@ FROM golang:1.25 AS builder
 WORKDIR /app
 COPY . .
 RUN make scrape
-ENTRYPOINT ["/app/bin/scraper", "/app/jobboard.db"]
+ENTRYPOINT ["/app/bin/scraper", "-sqlite-db", "/app/jobboard.db"]
