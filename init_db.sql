@@ -13,6 +13,6 @@ CREATE TABLE jobs (
 	location TEXT,
 	category INTEGER,
 	created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-	updated_at DATETIME,
+	updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
 	company_id INTEGER
 );
