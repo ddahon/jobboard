@@ -1,4 +1,4 @@
-ARG DB_PATH
+ARG DB_PATH="/app/jobboard.db"
 FROM golang:1.25 AS builder
 WORKDIR /app
 COPY . .
